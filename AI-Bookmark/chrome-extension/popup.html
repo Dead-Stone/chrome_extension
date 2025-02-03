@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Bookmark Summarizer</title>
+  <style>
+    /* Global Styles */
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      margin: 0;
+      padding: 20px;
+      width: 400px;
+      height: 400px;
+    }
+    /* Fixed Container */
+    .container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      border: 1px solid #ddd;
+      background: #fff;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    /* Bookmark Section */
+    .bookmark-section {
+      padding: 20px;
+      border-bottom: 1px solid #eee;
+      transition: opacity 0.3s ease;
+    }
+    /* When chat is open, hide summary and reaction icons */
+    .bookmark-section.chat-open #summary,
+    .bookmark-section.chat-open .controls {
+      display: none;
+    }
+    .bookmark-section h2 {
+      font-size: 1.3em;
+      margin: 0 0 10px;
+      color: #333;
+    }
+    /* Title rendered as a clickable link */
+    .bookmark-section h2 a {
+      text-decoration: none;
+      color: inherit;
+    }
+    .bookmark-section h2 a:hover {
+      text-decoration: underline;
+    }
+    .bookmark-section p {
+      font-size: 0.95em;
+      line-height: 1.4;
+      color: #666;
+      margin: 0 0 10px;
+    }
+    /* Reaction Controls aligned to the right */
+    .controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .controls .icon {
+      cursor: pointer;
+      font-size: 1.3em;
+      color: #777;
+      transition: transform 0.2s ease, color 0.2s ease;
+    }
+    .controls .icon:hover {
+      color: #007bff;
+      transform: scale(1.15);
+    }
+    /* Loading indicator */
+    #loading {
+      text-align: center;
+      font-weight: bold;
+      margin-bottom: 10px;
+      display: none;
+      color: #007bff;
+    }
+    /* Chat Toggle Icon styled like reaction icons */
+    #chatToggleBtn {
+      cursor: pointer;
+      font-size: 1.3em;
+      color: #777;
+      transition: transform 0.2s ease, color 0.2s ease;
+      margin-left: 10px;
+    }
+    #chatToggleBtn:hover {
+      color: #007bff;
+      transform: scale(1.15);
+    }
+    /* Chat Modal Overlay */
+    .chat-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.97);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      display: none;
+      flex-direction: column;
+      z-index: 10;
+      transition: opacity 0.3s ease;
+    }
+    .chat-modal.open {
+      display: flex;
+      opacity: 1;
+    }
+    /* Chat Modal Header with blue background */
+    .chat-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(135deg, #4a90e2, #357ab8);
+      color: white;
+      padding: 8px 12px;
+    }
+    .chat-title {
+      font-size: 1.1em;
+      font-weight: 600;
+    }
+    .chat-header button {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.1em;
+      cursor: pointer;
+    }
+    /* Conversation Area */
+    #conversation {
+      flex: 1;
+      padding: 10px;
+      overflow-y: auto;
+      background: #fafafa;
+      border-top: 1px solid #eee;
+      border-bottom: 1px solid #eee;
+      font-size: 0.8em;
+    }
+    .message {
+      margin-bottom: 8px;
+    }
+    .message.user { text-align: right; }
+    .message.bot { text-align: left; }
+    .message p {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 8px;
+      max-width: 80%;
+      background: #ececec;
+      color: #333;
+    }
+    .message.user p { background: #dcf8c6; }
+    /* Chat Controls */
+    .chat-controls {
+      display: flex;
+      padding: 10px;
+      background: #f1f1f1;
+    }
+    #chatInput {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 0.8em;
+    }
+    #sendButton {
+      margin-left: 8px;
+      padding: 8px 12px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.8em;
+      transition: background 0.2s ease;
+    }
+    #sendButton:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Bookmark Section -->
+    <div class="bookmark-section" id="bookmarkSection">
+      <div id="loading">Loading...</div>
+      <div id="bookmark">
+        <!-- Title now as clickable link -->
+        <h2 id="title"><a id="bookmarkLink" href="#" target="_blank">Bookmark Title</a></h2>
+        <p id="summary">Bookmark summary will appear here.</p>
+      </div>
+      <!-- Reaction controls and chat toggle icon -->
+      <div class="controls" id="bookmarkControls">
+        <span id="likeButton" class="icon">👍</span>
+        <span id="dislikeButton" class="icon">👎</span>
+        <span id="nextButton" class="icon">➡</span>
+        <span id="chatToggleBtn" class="icon">💬</span>
+      </div>
+    </div>
+    <!-- Chat Modal Overlay -->
+    <div class="chat-modal" id="chatModal">
+      <div class="chat-header">
+        <span class="chat-title" id="chatTitle">Bookmark Title</span>
+        <button id="closeChatBtn">✕</button>
+      </div>
+      <div id="conversation"></div>
+      <div class="chat-controls">
+        <input type="text" id="chatInput" placeholder="Type your query and press Enter" />
+        <button id="sendButton">Send</button>
+      </div>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

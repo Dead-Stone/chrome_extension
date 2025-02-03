@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "Bookmark Summarizer",
+  "version": "1.0",
+  "description": "Extracts bookmarks, summarizes them using an LLM, and stores data in a graph.",
+  "permissions": [
+    "bookmarks",
+    "storage",
+    "activeTab",
+    "scripting",
+    "identity"
+  ],
+  "oauth2": {
+    "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email"
+    ]
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.png"
+  }
+}
